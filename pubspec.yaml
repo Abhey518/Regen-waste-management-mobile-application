@@ -1,0 +1,42 @@
+name: app1
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.19.0 <3.0.0"
+  flutter: ">=3.7.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  fl_chart: ^0.70.2
+  flutter_map: ^8.1.1
+  intl: ^0.20.2
+  image_picker: ^1.1.2
+  percent_indicator: ^4.2.5
+  provider: ^6.1.5
+  shared_preferences: ^2.5.3
+  supabase_flutter: ^2.3.0
+  flutter_dotenv: ^5.1.0
+  flutter_secure_storage: ^8.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/logo.png  # Add this line for your logo
+    - .env
+  
+  # To add more assets later, follow this format:
+  # assets:
+  #   - assets/images/logo.png
+  #   - assets/images/background.jpg
+  #   - assets/icons/
