@@ -1,6 +1,6 @@
 {
-    "name": "app1",
-    "short_name": "app1",
+    "name": "Regen",
+    "short_name": "Regen",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

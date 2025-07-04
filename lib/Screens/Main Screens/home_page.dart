@@ -4,6 +4,7 @@ import '../sub Screens/bin_status_window.dart';
 import '../sub Screens/notifications_window.dart';
 import '../sub Screens/profile_window.dart';
 import '../sub Screens/report_dumping_window.dart';
+import '../sub Screens/truck_location_map.dart';
 import '../Main Screens/Navigation Bar/menu_window.dart';
 import '../Main Screens/Navigation Bar/articles_window.dart';
 import '../Main Screens/Navigation Bar/kids_window.dart';
@@ -336,7 +337,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        // Open truck tracking map
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TruckLocationMap(),
+                          ),
+                        );
                       },
                       icon: const Icon(Icons.location_on,
                           size: 20, color: Color.fromARGB(255, 2, 139, 7)),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:app1/main.dart';
+import 'package:regen/main.dart';
 
 void main() {
   testWidgets('Sign in page renders correctly', (WidgetTester tester) async {

@@ -199,7 +199,7 @@ class WasteManagementApp extends StatelessWidget {
     );
 
     return MaterialApp(
-      title: 'Waste Management',
+      title: 'Regen - Waste Management',
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: themeProvider.themeMode,
