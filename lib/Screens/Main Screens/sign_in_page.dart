@@ -30,9 +30,8 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   void initState() {
-    super.initState();
-    _emailFocusNode.addListener(() => setState(() {}));
-    _passwordFocusNode.addListener(() => setState(() {}));
+    super
+        .initState(); // No focus listeners needed since we removed focus-dependent styling
   }
 
   @override
@@ -197,6 +196,10 @@ class _SignInPageState extends State<SignInPage> {
                               controller: _emailController,
                               focusNode: _emailFocusNode,
                               keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              autofillHints: const [AutofillHints.email],
+                              onFieldSubmitted: (_) =>
+                                  _passwordFocusNode.requestFocus(),
                               decoration: InputDecoration(
                                 labelText: 'Email',
                                 floatingLabelBehavior:
@@ -223,15 +226,8 @@ class _SignInPageState extends State<SignInPage> {
                                 ),
                                 contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 16, vertical: 16),
-                                labelStyle: TextStyle(
-                                  color: _emailFocusNode.hasFocus
-                                      ? primaryColor
-                                      : Colors.grey[600],
-                                ),
-                                prefixIcon: Icon(Icons.email_outlined,
-                                    color: _emailFocusNode.hasFocus
-                                        ? primaryColor
-                                        : Colors.grey),
+                                prefixIcon: const Icon(Icons.email_outlined,
+                                    color: Colors.grey),
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -247,6 +243,9 @@ class _SignInPageState extends State<SignInPage> {
                             TextFormField(
                               controller: _passwordController,
                               focusNode: _passwordFocusNode,
+                              textInputAction: TextInputAction.done,
+                              autofillHints: const [AutofillHints.password],
+                              onFieldSubmitted: (_) => _login(),
                               decoration: InputDecoration(
                                 labelText: 'Password',
                                 floatingLabelBehavior:
@@ -273,23 +272,14 @@ class _SignInPageState extends State<SignInPage> {
                                 ),
                                 contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 16, vertical: 16),
-                                labelStyle: TextStyle(
-                                  color: _passwordFocusNode.hasFocus
-                                      ? primaryColor
-                                      : Colors.grey[600],
-                                ),
-                                prefixIcon: Icon(Icons.lock_outline,
-                                    color: _passwordFocusNode.hasFocus
-                                        ? primaryColor
-                                        : Colors.grey),
+                                prefixIcon: const Icon(Icons.lock_outline,
+                                    color: Colors.grey),
                                 suffixIcon: IconButton(
                                   icon: Icon(
                                     _obscurePassword
                                         ? Icons.visibility_off
                                         : Icons.visibility,
-                                    color: _passwordFocusNode.hasFocus
-                                        ? primaryColor
-                                        : Colors.grey,
+                                    color: Colors.grey,
                                   ),
                                   onPressed: () {
                                     setState(() {

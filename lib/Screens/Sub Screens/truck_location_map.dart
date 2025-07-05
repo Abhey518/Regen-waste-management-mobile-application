@@ -100,6 +100,7 @@ class _TruckLocationMapState extends State<TruckLocationMap> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Truck Location'),
+        centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Color.fromARGB(255, 2, 139, 7),
         elevation: 0,
@@ -177,8 +178,7 @@ class _TruckLocationMapState extends State<TruckLocationMap> {
                       children: [
                         TileLayer(
                           urlTemplate:
-                              'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                          subdomains: const ['a', 'b', 'c'],
+                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                           userAgentPackageName: 'com.example.regen',
                           maxZoom: 19,
                         ),

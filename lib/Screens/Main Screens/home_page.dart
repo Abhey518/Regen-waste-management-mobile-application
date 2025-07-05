@@ -108,10 +108,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             _buildGarbagePickupSection(),
-            const SizedBox(
-                height: 20), // Added this SizedBox for consistent spacing
+            const SizedBox(height: 12), // Reduced from 20
             _buildPointsSystem(progress),
-            const SizedBox(height: 16), // This spacing matches the one above
+            const SizedBox(height: 12), // Reduced from 16
             _buildFeatureGrid(),
           ],
         ),
@@ -168,7 +167,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final today = DateTime(now.year, now.month, now.day);
     final nextPickupDay = DateTime(now.year, now.month, now.day + 2);
     final isPickupToday = now.weekday == DateTime.wednesday;
-    final garbageType = isPickupToday ? "Plastic/Polythene" : "Organic Waste";
     final nextGarbageType = "Organic Waste";
 
     return Container(
@@ -189,6 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header
           Row(
             children: [
               const Icon(Icons.local_shipping,
@@ -204,167 +203,338 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    'Today: ${DateFormat('MMMM d, y').format(today)}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 18,
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 30,
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: isPickupToday
-                          ? const Color.fromARGB(255, 220, 255, 220)
-                          : const Color.fromARGB(255, 255, 230, 230),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isPickupToday
-                            ? const Color.fromARGB(255, 100, 200, 100)
-                            : const Color.fromARGB(255, 200, 100, 100),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isPickupToday ? Icons.recycling : Icons.block,
-                          size: 20,
-                          color: isPickupToday
-                              ? const Color.fromARGB(255, 0, 128, 0)
-                              : const Color.fromARGB(255, 200, 0, 0),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          isPickupToday ? garbageType : 'No Collection',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: isPickupToday
-                                ? const Color.fromARGB(255, 0, 128, 0)
-                                : const Color.fromARGB(255, 200, 0, 0),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+          const SizedBox(height: 20),
+
+          // Today's Schedule Card
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isPickupToday
+                    ? const Color.fromARGB(255, 100, 200, 100)
+                    : const Color.fromARGB(255, 200, 150, 150),
+                width: 2,
               ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Text(
-                    'Next pickup: ${DateFormat('MMMM d').format(nextPickupDay)}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 30,
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 220, 240, 255),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color.fromARGB(255, 100, 150, 200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Label and Time Row with fixed alignment
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // TODAY label - flexible left side
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.today,
+                                color: isPickupToday
+                                    ? const Color.fromARGB(255, 2, 139, 7)
+                                    : Colors.grey[600],
+                                size: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'TODAY',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: isPickupToday
+                                      ? const Color.fromARGB(255, 2, 139, 7)
+                                      : Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          // Collection Type underneath TODAY
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isPickupToday
+                                  ? const Color.fromARGB(255, 220, 255, 220)
+                                  : const Color.fromARGB(255, 255, 245, 245),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  isPickupToday
+                                      ? Icons.check_circle
+                                      : Icons.cancel,
+                                  size: 18,
+                                  color: isPickupToday
+                                      ? const Color.fromARGB(255, 0, 128, 0)
+                                      : const Color.fromARGB(
+                                          255, 200, 100, 100),
+                                ),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    isPickupToday
+                                        ? 'Plastic/Polythene'
+                                        : 'No Collection',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                      color: isPickupToday
+                                          ? const Color.fromARGB(255, 0, 128, 0)
+                                          : const Color.fromARGB(
+                                              255, 200, 100, 100),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                    const SizedBox(width: 12),
+                    // Time and Date column - maintains right alignment
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        const Icon(
-                          Icons.delete,
-                          size: 20,
-                          color: Color.fromARGB(255, 0, 100, 200),
+                        // Pickup Time
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.schedule,
+                              size: 20,
+                              color: isPickupToday
+                                  ? const Color.fromARGB(255, 0, 120, 0)
+                                  : const Color.fromARGB(255, 221, 14, 14),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              isPickupToday
+                                  ? '1:00 PM - 2:00 PM'
+                                  : 'No pickup scheduled',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: isPickupToday
+                                    ? const Color.fromARGB(255, 0, 120, 0)
+                                    : const Color.fromARGB(255, 221, 14, 14),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(height: 16),
+                        // Date underneath time
                         Text(
-                          nextGarbageType,
+                          DateFormat('MMMM d, y').format(today),
                           style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 0, 100, 200),
+                            fontSize: 19,
+                            fontWeight: FontWeight.w600,
+                            color: Color.fromARGB(255, 50, 50, 50),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Next Pickup Card
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color.fromARGB(255, 100, 150, 200),
+                width: 2,
               ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        _showCalendarDialog(context);
-                      },
-                      icon: const Icon(Icons.calendar_month,
-                          size: 20, color: Color.fromARGB(255, 2, 139, 7)),
-                      label: const Text(
-                        'View Schedule',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 2, 139, 7),
-                          fontSize: 14,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          side: const BorderSide(
-                              color: Color.fromARGB(255, 2, 139, 7)),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TruckLocationMap(),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Label and Time Row with fixed alignment
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // NEXT PICKUP label - flexible left side
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.upcoming,
+                                color: Color.fromARGB(255, 0, 100, 200),
+                                size: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'NEXT PICKUP',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 0, 100, 200),
+                                ),
+                              ),
+                            ],
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.location_on,
-                          size: 20, color: Color.fromARGB(255, 2, 139, 7)),
-                      label: const Text(
-                        'Truck Location',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 2, 139, 7),
-                          fontSize: 14,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          side: const BorderSide(
-                              color: Color.fromARGB(255, 2, 139, 7)),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                          const SizedBox(height: 8),
+                          // Waste Type underneath NEXT PICKUP
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 220, 240, 255),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.recycling,
+                                  size: 18,
+                                  color: Color.fromARGB(255, 0, 100, 200),
+                                ),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    nextGarbageType,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                      color: Color.fromARGB(255, 0, 100, 200),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                    const SizedBox(width: 12),
+                    // Time and Date column - maintains right alignment
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // Pickup Time
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.schedule,
+                              size: 20,
+                              color: Color.fromARGB(255, 0, 100, 200),
+                            ),
+                            const SizedBox(width: 6),
+                            const Text(
+                              '10:00 AM - 11:00 AM',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(255, 0, 100, 200),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        // Date underneath time
+                        Text(
+                          DateFormat('MMMM d, y').format(nextPickupDay),
+                          style: const TextStyle(
+                            fontSize: 19,
+                            fontWeight: FontWeight.w600,
+                            color: Color.fromARGB(255, 50, 50, 50),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Action Buttons
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    _showCalendarDialog(context);
+                  },
+                  icon: const Icon(Icons.calendar_month,
+                      size: 20, color: Color.fromARGB(255, 2, 139, 7)),
+                  label: const Text(
+                    'View Schedule',
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 2, 139, 7),
+                      fontSize: 14,
+                    ),
                   ),
-                ],
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: const BorderSide(
+                          color: Color.fromARGB(255, 2, 139, 7)),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TruckLocationMap(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.location_on,
+                      size: 20, color: Color.fromARGB(255, 2, 139, 7)),
+                  label: const Text(
+                    'Truck Location',
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 2, 139, 7),
+                      fontSize: 14,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: const BorderSide(
+                          color: Color.fromARGB(255, 2, 139, 7)),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
               ),
             ],
           ),
