@@ -8,6 +8,7 @@ import '../sub Screens/truck_location_map.dart';
 import '../Main Screens/Navigation Bar/menu_window.dart';
 import '../Main Screens/Navigation Bar/articles_window.dart';
 import '../Main Screens/Navigation Bar/kids_window.dart';
+import '../../services/garbage_schedule_service.dart';
 
 void main() {
   runApp(const HomePage());
@@ -51,6 +52,46 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   int totalPoints = 750;
   int maxPoints = 1000;
+
+  // Garbage pickup data
+  final GarbageScheduleService _garbageService = GarbageScheduleService();
+  GarbagePickup? _todaysPickup;
+  GarbagePickup? _nextPickup;
+  List<GarbagePickup> _monthlySchedule = [];
+  bool _isLoadingSchedule = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGarbageSchedule();
+  }
+
+  Future<void> _loadGarbageSchedule() async {
+    setState(() {
+      _isLoadingSchedule = true;
+    });
+
+    try {
+      // Load today's and next pickup
+      final todaysPickupFuture = _garbageService.getTodaysPickup();
+      final nextPickupFuture = _garbageService.getNextPickup();
+
+      final results = await Future.wait([todaysPickupFuture, nextPickupFuture]);
+
+      _todaysPickup = results[0];
+      _nextPickup = results[1];
+
+      // Load monthly schedule for calendar
+      final now = DateTime.now();
+      _monthlySchedule = await _garbageService.getMonthlySchedule(now);
+    } catch (e) {
+      print('Error loading garbage schedule: $e');
+    } finally {
+      setState(() {
+        _isLoadingSchedule = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,15 +145,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildGarbagePickupSection(),
-            const SizedBox(height: 12), // Reduced from 20
-            _buildPointsSystem(progress),
-            const SizedBox(height: 12), // Reduced from 16
-            _buildFeatureGrid(),
-          ],
+      body: RefreshIndicator(
+        onRefresh: _loadGarbageSchedule,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildGarbagePickupSection(),
+              const SizedBox(height: 12), // Reduced from 20
+              _buildPointsSystem(progress),
+              const SizedBox(height: 12), // Reduced from 16
+              _buildFeatureGrid(),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -163,11 +207,41 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildGarbagePickupSection() {
+    if (_isLoadingSchedule) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 229, 250, 229),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        margin: const EdgeInsets.all(16),
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final nextPickupDay = DateTime(now.year, now.month, now.day + 2);
-    final isPickupToday = now.weekday == DateTime.wednesday;
-    final nextGarbageType = "Organic Waste";
+    final isPickupToday = _todaysPickup != null;
+
+    // Use data from backend or show default message
+    final todaysWasteType = _todaysPickup?.wasteType ?? 'No Collection';
+    final todaysTimeRange =
+        _todaysPickup?.formattedTime12Hour ?? 'No pickup scheduled';
+
+    final nextWasteType = _nextPickup?.wasteType ?? 'No upcoming pickups';
+    final nextTimeRange = _nextPickup?.formattedTime12Hour ?? 'Check schedule';
+    final nextPickupDay =
+        _nextPickup?.pickupDate ?? DateTime.now().add(const Duration(days: 2));
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -281,9 +355,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(width: 6),
                                 Flexible(
                                   child: Text(
-                                    isPickupToday
-                                        ? 'Plastic/Polythene'
-                                        : 'No Collection',
+                                    todaysWasteType,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
                                       fontSize: 13,
@@ -320,9 +392,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              isPickupToday
-                                  ? '1:00 PM - 2:00 PM'
-                                  : 'No pickup scheduled',
+                              todaysTimeRange,
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -416,7 +486,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(width: 6),
                                 Flexible(
                                   child: Text(
-                                    nextGarbageType,
+                                    nextWasteType,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w600,
                                       fontSize: 13,
@@ -447,9 +517,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Color.fromARGB(255, 0, 100, 200),
                             ),
                             const SizedBox(width: 6),
-                            const Text(
-                              '10:00 AM - 11:00 AM',
-                              style: TextStyle(
+                            Text(
+                              nextTimeRange,
+                              style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: Color.fromARGB(255, 0, 100, 200),
@@ -582,23 +652,66 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Add the days of the month
     for (int day = 1; day <= daysInMonth; day++) {
-      final isPickupDay =
-          DateTime(year, month, day).weekday == DateTime.wednesday;
+      final currentDate = DateTime(year, month, day);
+
+      // Check if there's a pickup on this day from backend data
+      final hasPickup = _monthlySchedule.any((pickup) =>
+          pickup.pickupDate.year == currentDate.year &&
+          pickup.pickupDate.month == currentDate.month &&
+          pickup.pickupDate.day == currentDate.day);
+
+      // Get the pickup for this day to show waste type
+      final dayPickup = _monthlySchedule
+          .where((pickup) =>
+              pickup.pickupDate.year == currentDate.year &&
+              pickup.pickupDate.month == currentDate.month &&
+              pickup.pickupDate.day == currentDate.day)
+          .firstOrNull;
+
       calendarItems.add(
         Center(
-          child: Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: isPickupDay ? Colors.green.withValues(alpha: 0.2) : null,
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              '$day',
-              style: TextStyle(
-                color: isPickupDay
-                    ? Colors.green
-                    : const Color.fromARGB(255, 29, 39, 25),
-                fontWeight: isPickupDay ? FontWeight.bold : FontWeight.normal,
+          child: GestureDetector(
+            onTap: hasPickup && dayPickup != null
+                ? () {
+                    // Show pickup details
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text(
+                            'Pickup Details - ${DateFormat('MMM d').format(currentDate)}'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Waste Type: ${dayPickup.wasteType}'),
+                            Text('Time: ${dayPickup.formattedTime12Hour}'),
+                            Text('Status: ${dayPickup.status}'),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Close'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                : null,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: hasPickup ? Colors.green.withValues(alpha: 0.2) : null,
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                '$day',
+                style: TextStyle(
+                  color: hasPickup
+                      ? Colors.green
+                      : const Color.fromARGB(255, 29, 39, 25),
+                  fontWeight: hasPickup ? FontWeight.bold : FontWeight.normal,
+                ),
               ),
             ),
           ),
@@ -640,6 +753,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text('Green days are collection days'),
                 ],
               ),
+              const SizedBox(height: 8),
+              if (_monthlySchedule.isEmpty)
+                const Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 16, color: Colors.blue),
+                    SizedBox(width: 8),
+                    Flexible(
+                        child: Text(
+                            'No pickup schedules available for this month')),
+                  ],
+                ),
             ],
           ),
         ),

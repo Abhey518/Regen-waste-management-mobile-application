@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme_provider.dart';
 import 'feedback_screen.dart';
 import '../../services/user_service.dart';
+import '../Main Screens/sign_in_page.dart';
 
 class ProfileWindow extends StatefulWidget {
   const ProfileWindow({super.key});
@@ -17,6 +18,7 @@ class _ProfileWindowState extends State<ProfileWindow> {
   String? userEmail;
   bool isLoading = true;
   Map<String, dynamic>? userProfile;
+  final supabase = Supabase.instance.client;
 
   @override
   void initState() {
@@ -40,7 +42,7 @@ class _ProfileWindowState extends State<ProfileWindow> {
       });
     } catch (e) {
       // Fallback to auth user data if profile doesn't exist
-      final user = Supabase.instance.client.auth.currentUser;
+      final user = supabase.auth.currentUser;
       setState(() {
         userName = user?.email?.split('@')[0] ?? 'User';
         userEmail = user?.email ?? 'No email';
@@ -48,6 +50,55 @@ class _ProfileWindowState extends State<ProfileWindow> {
       });
 
       debugPrint('Error loading user profile: $e');
+    }
+  }
+
+  Future<void> _showLogoutConfirmation() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // User can tap outside to dismiss
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Log Out'),
+          content: const Text('Are you sure you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss the dialog
+              },
+            ),
+            TextButton(
+              child: const Text(
+                'Log Out',
+                style: TextStyle(color: Colors.red),
+              ),
+              onPressed: () async {
+                Navigator.of(context).pop(); // Dismiss the dialog
+                await _performLogout();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _performLogout() async {
+    try {
+      await supabase.auth.signOut();
+
+      // Navigate to sign in page and remove all previous routes
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const SignInPage()),
+        (Route<dynamic> route) => false,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error logging out: ${e.toString()}')),
+      );
+      debugPrint('Error logging out: $e');
     }
   }
 
@@ -137,7 +188,7 @@ class _ProfileWindowState extends State<ProfileWindow> {
               _buildProfileItem(context, Icons.settings, 'Settings'),
               _buildProfileItem(context, Icons.group, 'About Us'),
               _buildProfileItem(context, Icons.logout, 'Log Out',
-                  isLogout: true),
+                  isLogout: true, onTap: _showLogoutConfirmation),
             ],
           ),
         ),
