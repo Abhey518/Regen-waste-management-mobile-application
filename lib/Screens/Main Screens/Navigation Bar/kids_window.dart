@@ -11,6 +11,8 @@ class KidsWindow extends StatefulWidget {
 class _KidsWindowState extends State<KidsWindow> {
   final SupabaseClient _supabase = Supabase.instance.client;
   List<KidsPost> _posts = [];
+  List<KidsPost> _filteredPosts = [];
+  String _selectedFilter = 'All';
   final Set<String> _completedQuizzes = {};
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
@@ -57,6 +59,7 @@ class _KidsWindowState extends State<KidsWindow> {
 
       setState(() {
         _posts = posts;
+        _filteredPosts = posts;
       });
     } catch (e) {
       setState(() {
@@ -82,6 +85,7 @@ class _KidsWindowState extends State<KidsWindow> {
       setState(() {
         _completedQuizzes.addAll(completedIds);
         _isLoading = false;
+        _applyFilter(); // Apply the current filter after loading data
       });
     } catch (e) {
       setState(() {
@@ -89,6 +93,13 @@ class _KidsWindowState extends State<KidsWindow> {
         _isLoading = false;
       });
       debugPrint('Error loading completed quizzes: $e');
+    }
+  }
+
+  Future<void> _refreshData() async {
+    await _loadPosts();
+    if (_userId != null) {
+      await _loadCompletedQuizzes();
     }
   }
 
@@ -103,6 +114,7 @@ class _KidsWindowState extends State<KidsWindow> {
 
       setState(() {
         _completedQuizzes.add(postId);
+        _applyFilter(); // Update filtered list when quiz is completed
       });
     } catch (e) {
       debugPrint('Error marking quiz as complete: $e');
@@ -200,6 +212,32 @@ class _KidsWindowState extends State<KidsWindow> {
     );
   }
 
+  void _filterPosts(String filter) {
+    setState(() {
+      _selectedFilter = filter;
+      _applyFilter();
+    });
+  }
+
+  void _applyFilter() {
+    switch (_selectedFilter) {
+      case 'Completed':
+        _filteredPosts = _posts
+            .where((post) => _completedQuizzes.contains(post.id))
+            .toList();
+        break;
+      case 'Pending':
+        _filteredPosts = _posts
+            .where((post) => !_completedQuizzes.contains(post.id))
+            .toList();
+        break;
+      case 'All':
+      default:
+        _filteredPosts = _posts;
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
@@ -209,41 +247,116 @@ class _KidsWindowState extends State<KidsWindow> {
           title: const Text('Eco Kids Corner'),
           centerTitle: true,
           actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () async {
-                await _loadPosts();
-                if (_userId != null) {
-                  await _loadCompletedQuizzes();
-                }
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.filter_list),
+              onSelected: _filterPosts,
+              itemBuilder: (BuildContext context) {
+                return [
+                  'All',
+                  'Completed',
+                  'Pending',
+                ].map((String choice) {
+                  return PopupMenuItem<String>(
+                    value: choice,
+                    child: Row(
+                      children: [
+                        Icon(
+                          choice == 'All'
+                              ? Icons.apps
+                              : choice == 'Completed'
+                                  ? Icons.check_circle
+                                  : Icons.pending,
+                          size: 20,
+                          color: _selectedFilter == choice
+                              ? Theme.of(context).colorScheme.primary
+                              : null,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(choice),
+                        if (_selectedFilter == choice) ...[
+                          const Spacer(),
+                          Icon(
+                            Icons.check,
+                            size: 16,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                }).toList();
               },
             ),
           ],
         ),
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _errorMessage != null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(_errorMessage!),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _initializeUser,
-                          child: const Text('Retry'),
+        body: RefreshIndicator(
+          onRefresh: _refreshData,
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _errorMessage != null
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(_errorMessage!),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _initializeUser,
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    )
+                  : _filteredPosts.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _selectedFilter == 'Completed'
+                                    ? Icons.check_circle_outline
+                                    : _selectedFilter == 'Pending'
+                                        ? Icons.pending_outlined
+                                        : Icons.quiz_outlined,
+                                size: 64,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                _selectedFilter == 'Completed'
+                                    ? 'No completed quizzes yet'
+                                    : _selectedFilter == 'Pending'
+                                        ? 'No pending quizzes'
+                                        : 'No quizzes available',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _selectedFilter == 'Completed'
+                                    ? 'Complete some quizzes to earn stars!'
+                                    : _selectedFilter == 'Pending'
+                                        ? 'Great job! You\'ve completed all quizzes!'
+                                        : 'Check back later for new content',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(8),
+                          itemCount: _filteredPosts.length,
+                          itemBuilder: (context, index) {
+                            final post = _filteredPosts[index];
+                            return _buildPostCard(context, post);
+                          },
                         ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(8),
-                    itemCount: _posts.length,
-                    itemBuilder: (context, index) {
-                      final post = _posts[index];
-                      return _buildPostCard(context, post);
-                    },
-                  ),
+        ),
       ),
     );
   }

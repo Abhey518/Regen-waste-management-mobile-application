@@ -106,58 +106,161 @@ class _ArticlesWindowState extends State<ArticlesWindow> {
             icon: const Icon(Icons.filter_list),
             onSelected: _filterArticles,
             itemBuilder: (BuildContext context) {
-              // Get unique categories from articles
-              final categories =
-                  _articles.map((a) => a.category).toSet().toList()..sort();
-
-              return [
+              // Fixed categories only
+              final allChoices = [
                 'All',
                 'Saved',
-                ...categories,
-              ].map((String choice) {
+                'Informative',
+                'Laws',
+                'Sustainability',
+              ];
+
+              return allChoices.map((String choice) {
+                IconData getIconForChoice(String choice) {
+                  switch (choice.toLowerCase()) {
+                    case 'all':
+                      return Icons.apps;
+                    case 'saved':
+                      return Icons.bookmark;
+                    case 'recycling':
+                    case 'waste':
+                      return Icons.recycling;
+                    case 'environment':
+                    case 'nature':
+                      return Icons.nature;
+                    case 'climate':
+                    case 'weather':
+                      return Icons.cloud;
+                    case 'energy':
+                      return Icons.bolt;
+                    case 'water':
+                      return Icons.water_drop;
+                    case 'sustainability':
+                      return Icons.eco;
+                    case 'tips':
+                    case 'advice':
+                      return Icons.lightbulb;
+                    case 'news':
+                      return Icons.newspaper;
+                    case 'technology':
+                    case 'tech':
+                      return Icons.settings;
+                    case 'law':
+                    case 'laws':
+                    case 'legal':
+                    case 'legislation':
+                    case 'policy':
+                    case 'regulation':
+                      return Icons.gavel;
+                    case 'informative':
+                    case 'information':
+                    case 'info':
+                      return Icons.info;
+                    case 'education':
+                    case 'educational':
+                      return Icons.school;
+                    case 'research':
+                      return Icons.science;
+                    case 'guide':
+                    case 'guidelines':
+                      return Icons.map;
+                    default:
+                      return Icons.article;
+                  }
+                }
+
                 return PopupMenuItem<String>(
                   value: choice,
-                  child: Text(choice),
+                  child: Row(
+                    children: [
+                      Icon(
+                        getIconForChoice(choice),
+                        size: 20,
+                        color: _selectedCategory == choice
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(choice)),
+                      if (_selectedCategory == choice) ...[
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.check,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ],
+                    ],
+                  ),
                 );
               }).toList();
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadArticles,
-          ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(_errorMessage!),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadArticles,
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                )
-              : _filteredArticles.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'No articles found',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: _filteredArticles.length,
-                      itemBuilder: (context, index) {
-                        final article = _filteredArticles[index];
-                        return _buildArticleCard(article);
-                      },
+      body: RefreshIndicator(
+        onRefresh: _loadArticles,
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _errorMessage != null
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(_errorMessage!),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _loadArticles,
+                          child: const Text('Retry'),
+                        ),
+                      ],
                     ),
+                  )
+                : _filteredArticles.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              _selectedCategory == 'Saved'
+                                  ? Icons.bookmark_border
+                                  : Icons.article_outlined,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _selectedCategory == 'Saved'
+                                  ? 'No saved articles yet'
+                                  : _selectedCategory == 'All'
+                                      ? 'No articles available'
+                                      : 'No articles in $_selectedCategory',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _selectedCategory == 'Saved'
+                                  ? 'Save articles by tapping the bookmark icon'
+                                  : 'Check back later for new content',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: _filteredArticles.length,
+                        itemBuilder: (context, index) {
+                          final article = _filteredArticles[index];
+                          return _buildArticleCard(article);
+                        },
+                      ),
+      ),
     );
   }
 

@@ -147,11 +147,6 @@ class _NotificationsWindowState extends State<NotificationsWindow> {
               tooltip: 'Mark all as read',
               onPressed: _markAllAsRead,
             ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
-            onPressed: _loadNotifications,
-          ),
         ],
       ),
       body: RefreshIndicator(
