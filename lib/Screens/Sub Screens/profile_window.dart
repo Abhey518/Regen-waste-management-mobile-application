@@ -1,9 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme_provider.dart';
+import 'feedback_screen.dart';
+import '../../services/user_service.dart';
 
-class ProfileWindow extends StatelessWidget {
+class ProfileWindow extends StatefulWidget {
   const ProfileWindow({super.key});
+
+  @override
+  State<ProfileWindow> createState() => _ProfileWindowState();
+}
+
+class _ProfileWindowState extends State<ProfileWindow> {
+  String? userName;
+  String? userEmail;
+  bool isLoading = true;
+  Map<String, dynamic>? userProfile;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      // Get user profile from the users table
+      userProfile = await UserService.getUserProfile();
+
+      setState(() {
+        userName = UserService.formatUserName(userProfile);
+        userEmail = UserService.formatUserEmail(userProfile);
+        isLoading = false;
+      });
+    } catch (e) {
+      // Fallback to auth user data if profile doesn't exist
+      final user = Supabase.instance.client.auth.currentUser;
+      setState(() {
+        userName = user?.email?.split('@')[0] ?? 'User';
+        userEmail = user?.email ?? 'No email';
+        isLoading = false;
+      });
+
+      debugPrint('Error loading user profile: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,48 +82,71 @@ class ProfileWindow extends StatelessWidget {
         ],
       ),
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: theme.colorScheme.primary,
-              child: Icon(
-                Icons.person,
-                size: 50,
-                color: theme.colorScheme.onPrimary,
+      body: RefreshIndicator(
+        onRefresh: _loadUserData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              CircleAvatar(
+                radius: 50,
+                backgroundColor: theme.colorScheme.primary,
+                child: isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        userName != null && userName!.isNotEmpty
+                            ? userName![0].toUpperCase()
+                            : 'U',
+                        style: TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onPrimary,
+                        ),
+                      ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'User Name',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'user@gmail.com',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withAlpha(180),
-              ),
-            ),
-            const SizedBox(height: 24),
-            _buildProfileItem(context, Icons.person_outline, 'Edit Profile'),
-            _buildProfileItem(context, Icons.comment, 'Feedback & Suggestions'),
-            _buildProfileItem(context, Icons.settings, 'Settings'),
-            _buildProfileItem(context, Icons.group, 'About Us'),
-            _buildProfileItem(context, Icons.logout, 'Log Out', isLogout: true),
-          ],
+              const SizedBox(height: 16),
+              if (isLoading)
+                const CircularProgressIndicator()
+              else ...[
+                Text(
+                  userName ?? 'User Name',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  userEmail ?? 'user@gmail.com',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withAlpha(180),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 24),
+              _buildProfileItem(context, Icons.person_outline, 'Edit Profile'),
+              _buildProfileItem(
+                  context, Icons.comment, 'Feedback & Suggestions', onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const FeedbackScreen()),
+                );
+              }),
+              _buildProfileItem(context, Icons.settings, 'Settings'),
+              _buildProfileItem(context, Icons.group, 'About Us'),
+              _buildProfileItem(context, Icons.logout, 'Log Out',
+                  isLogout: true),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildProfileItem(BuildContext context, IconData icon, String text,
-      {bool isLogout = false}) {
+      {bool isLogout = false, VoidCallback? onTap}) {
     final theme = Theme.of(context);
 
     return Card(
@@ -108,7 +177,7 @@ class ProfileWindow extends StatelessWidget {
                   theme.cardColor,
                 ),
               ),
-        onTap: () {},
+        onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 12,
