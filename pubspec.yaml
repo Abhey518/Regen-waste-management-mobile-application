@@ -38,8 +38,3 @@ flutter:
     - assets/logo.png  # Add this line for your logo
     - .env
   
-  # To add more assets later, follow this format:
-  # assets:
-  #   - assets/images/logo.png
-  #   - assets/images/background.jpg
-  #   - assets/icons/
