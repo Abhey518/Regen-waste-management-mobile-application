@@ -8,11 +8,11 @@
 
 | Name | Student ID | Implemented Module / Responsibilities |
 | :--- | :--- | :--- |
-| **Abeywardhana A. A. / Arunoda Abeywardhana** | `CT/2021/072` | **Project Lead** • Guided & developed the frontend • Developed the backend • Guided & developed the admin dashboard • Trained and developed the [garbage classification & proportion analyser model](https://github.com/Abhey518/Regen-object-detection-analyser) |
-| **Mohan D. / Divyaloshini Mohan** | `CT/2021/085` | **Frontend Layouts & Documentation Lead** • Developed initial layouts for all application screens • Led the project documentation |
-| **Pahalawaththa P. R. / Pasindu Randima** | `CT/2021/056` | **Backend & Database Lead** • Guided and implemented backend integration • Database management |
-| **Jayamal B. M. / Bhanuka Malitha** | `CT/2021/058` | **Design & Admin Frontend Layout** • UI design • Guided and developed poster design • Developed initial layout for the Admin dashboard |
-| **Wijewardhana P. P. A. / Piyumi Wijewardhana** | `CT/2021/015` | **Design & Documentation Support** • Guided and developed UI design • Poster design • Project documentation support |
+| **Abeywardhana A. A. / Arunoda Abeywardhana** | `CT/2021/072` | **Project Lead**<br>• Guided & developed the frontend<br>• Developed the backend<br>• Guided & developed the admin dashboard<br>• Trained and developed the [garbage classification & proportion analyser model](https://github.com/Abhey518/Regen-object-detection-analyser) |
+| **Mohan D. / Divyaloshini Mohan** | `CT/2021/085` | **Frontend Layouts & Documentation Lead**<br>• Developed initial layouts for all application screens<br>• Led the project documentation |
+| **Pahalawaththa P. R. / Pasindu Randima** | `CT/2021/056` | **Backend & Database Lead**<br>• Guided and implemented backend integration<br>• Database management |
+| **Jayamal B. M. / Bhanuka Malitha** | `CT/2021/058` | **Design & Admin Frontend Layout**<br>• UI design<br>• Guided and developed poster design<br>• Developed initial layout for the Admin dashboard |
+| **Wijewardhana P. P. A. / Piyumi Wijewardhana** | `CT/2021/015` | **Design & Documentation Support**<br>• Guided and developed UI design<br>• Poster design<br>• Project documentation support |
 
 ---
 
@@ -36,7 +36,7 @@ The application allows residents to track garbage truck collections in real-time
 
 ## 🗄️ Database Architecture
 The platform runs on a PostgreSQL database hosted on Supabase. A complete combined schema file containing table declarations, indices, triggers, and views is located under:
-📂 **[database/schema.sql](file:///d:/PROJECTS/Regen/database/schema.sql)**
+📂 **[database/schema.sql](database/schema.sql)**
 
 ### Key Database Tables
 * `users`: Profiles linked with Supabase Authentication, tracking locations, contact info, and roles.
@@ -134,8 +134,16 @@ To launch the mobile application client:
 
 ---
 
+## 📄 Project Resources
+- **Web Administration Dashboard:** [Regen-waste-management-admin-dashboard](https://github.com/Abhey518/Regen-waste-management-admin-dashboard)
+- **Garbage Classification Model:** [Regen-object-detection-analyser](https://github.com/Abhey518/Regen-object-detection-analyser)
+- **Abstract:** View our [Project Abstract](docs/Regen-Abstract.jpg)
+- **Project Poster:** View our [Project Poster](docs/Regen%20-%20Project%20Poster.jpg)
+
+---
+
 ## 📄 License
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](file:///d:/PROJECTS/Regen/LICENSE) file for details.
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
 
 ---
 
