@@ -134,5 +134,11 @@ To launch the mobile application client:
 
 ---
 
+## 📄 License
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](file:///d:/PROJECTS/Regen/LICENSE) file for details.
+
+---
+
 Last Updated: July 2025
+
 
