@@ -12,7 +12,7 @@
 | **Mohan D. / Divyaloshini Mohan** | `CT/2021/085` | **Frontend Layouts & Documentation Lead** • Developed initial layouts for all application screens • Led the project documentation |
 | **Pahalawaththa P. R. / Pasindu Randima** | `CT/2021/056` | **Backend & Database Lead** • Guided and implemented backend integration • Database management |
 | **Jayamal B. M. / Bhanuka Malitha** | `CT/2021/058` | **Design & Admin Frontend Layout** • UI design • Guided and developed poster design • Developed initial layout for the Admin dashboard |
-| **Wijewardhana P. P. A. / Piyumi Wijewardhana** | `CT/2021/015` | **Design & Documentation Support** • UI design • Poster design • Project documentation support |
+| **Wijewardhana P. P. A. / Piyumi Wijewardhana** | `CT/2021/015` | **Design & Documentation Support** • Guided and developed UI design • Poster design • Project documentation support |
 
 ---
 
